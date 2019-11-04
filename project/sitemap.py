@@ -1,4 +1,4 @@
-#!/home/kkomissarov/projects/seo-crawler/venv/bin/python
+#!/home/kkomissarov/projects/seo-tools/venv/bin/python
 
 import argparse
 import requests
