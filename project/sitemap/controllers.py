@@ -1,19 +1,7 @@
-#!/home/kkomissarov/projects/seo-tools/venv/bin/python
-
-import argparse
 import requests
 from bs4 import BeautifulSoup as bs
 from utils import clean_domain
 import re
-
-
-def get_params(parser):
-    parser.add_argument('-d', '--domain')
-    parser.add_argument('-u', '--url')
-    parser.add_argument('-f', '--file')
-    namespace = parser.parse_args()
-    return namespace
-
 
 def get_robots_by_domain(domain):
     url = domain + '/robots.txt'
@@ -31,12 +19,10 @@ def validate_params(params):
     error_msg = None
 
     if params.domain and params.url:
-        error_msg = 'Нельзя использовать --domain и --url одновременно. Вы должны использовать один из этих параметров.'
+        raise Exception('Вы не можете использовать параметры --url и --domain одновременно.')
 
     if not params.domain and not params.url:
-        error_msg = 'Не указан источник карты сайта. Используйте --domain для автоматического поиска карты сайта или '\
-                    '--url, чтобы указать адрес карты сайта вручную.'
-
+        raise Exception('Не указан источник карты сайта. Используйте --url или --domain.')
     return error_msg
 
 
@@ -68,32 +54,24 @@ def parse_sitemap(sitemap_url):
     return result
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    params = get_params(parser)
+def main(args):
+    validate_params(args)
 
-    error_msg = validate_params(params)
-    if error_msg:
-        parser.error(error_msg)
-
-    sitemap_url = get_sitemap_url(params)
+    sitemap_url = get_sitemap_url(args)
     if not sitemap_url:
-        error_msg = 'Не удалось получить адрес карты сайта'
-        parser.error(error_msg)
+
+        raise Exception('Не удалось получить адрес карты сайта')
 
     print('Получаем список url. Это может занять некоторое время.')
     urls = parse_sitemap(sitemap_url)
 
-    if params.file:
-        with open(params.file, 'w') as result:
+    if args.file:
+        with open(args.file, 'w') as result:
             for url in urls:
                 result.write(f'{url}\n')
     else:
         for url in urls:
             print(url)
 
-
-if __name__ == '__main__':
-    main()
 
 
